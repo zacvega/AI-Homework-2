@@ -26,6 +26,30 @@ def printFloorLayout(array):
                 print(", ", end="") 
         print("")
 
+def printFloorState(array):
+    """
+    Displays which room has the vacuum and which rooms are dirty
+    """
+    matrix = np.array(array)
+    
+    dimensions = matrix.shape
+    rows, columns = dimensions
+    dirtyRooms = []
+    for i in range(rows):
+        for j in range(columns):
+            if (array[i][j].hasVacuum):
+                vacCords = (i+1,j+1)
+            if (array[i][j].isDirty):
+                dirtyRooms.append((i+1,j+1))
+
+
+    print("[V", vacCords, end="")
+    
+    if(dirtyRooms):
+        for pair in dirtyRooms:
+            print(", d"+str(pair), end="")
+    print("]")
+            
 
 def setSpace(rows: int, columns: int, vacuumStartLoc, dirty_squares):
     """
@@ -57,11 +81,13 @@ def setSpace(rows: int, columns: int, vacuumStartLoc, dirty_squares):
 def main():
     instance1 = setSpace(4, 5, (2,2), [(1,2),(2,4),(3,5)])
     printFloorLayout(instance1)
+    printFloorState(instance1)
      
     print("\n\n")
 
     instance2 = setSpace(4, 5, (3,2), [(1,2),(2,1),(2,4),(3,3)])
     printFloorLayout(instance2)
+    printFloorState(instance2)
 
 if(__name__ == "__main__"):
     main()
