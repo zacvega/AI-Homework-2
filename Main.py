@@ -71,7 +71,7 @@ class Space:
 
 
             case 'DOWN':
-                if(self.vacLoc[0] != 1 != self.rows):
+                if(self.vacLoc[0] != self.rows):
                     self.vacLoc = (self.vacLoc[0]+1, self.vacLoc[1]) 
                     print("Moved "+action.name+" to " + str(self.vacLoc))
                 else:
