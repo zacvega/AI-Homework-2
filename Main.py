@@ -7,6 +7,24 @@ class Actions(Enum):
     DOWN = .7
     SUCK = .6
 
+class Node:
+    def __init__(self, state, actions = [],pathCost = 0, depth = 0,  parent = None,):
+        self.state = state
+        self.pathCost = pathCost
+        self.depth = depth
+        self.actions = actions
+        self.parent = parent
+        self.result = None
+
+def expand(node, state):
+    successors = set()
+    for move in Actions:
+        s = Node(state, s.actions + move, s.pathCost + move.value, s.depth+1)
+        successors.add(s)
+
+    # print(successors)
+    return successors
+
 class Space:
     def __init__(self, rows, columns, vacuumStartLoc, dirty_squares):
         """
