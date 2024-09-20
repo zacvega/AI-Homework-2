@@ -122,6 +122,34 @@ class Space:
                     print("Didn't perform action " + action.name)
         
 
+# function Depth-Limited-Search( problem,limit) returns soln/fail/cutoff
+# Recursive-DLS(Make-Node(Initial-Stat e [problem]),problem,limit)
+# function Recursive-DLS(node,problem,limit) returns soln/fail/cutoff
+# cutoff-occurred? ← false
+# if Goal-Test(problem,State[node]) then return node
+# else if Depth[node] = limit then return cutoff
+# else for each successor in Expand(node,problem) do
+# result ← Recursive-DLS(successor,problem,limit)
+# if result = cutoff then cutoff-occurred? ← true
+# else if result ≠ failure then return result
+# if cutoff-occurred? then return cutoff else return failure
+
+def iddfs(node,limit):
+        def dls(depth):
+            if len(node.state.dirtLocs) == 0:
+                return 1
+            if depth == 0:
+                return None
+            for action in Actions:
+                node.state.performAction(action)
+            return None
+        depth = 0
+        while True:
+            result = dls(depth)
+            if result == 1:
+                print(node.state.ActionList)
+                return 0
+            depth += 1
 
 def main():
     instance1 = Space(4, 5, (2,2), [(1,2),(2,4),(3,5)])
