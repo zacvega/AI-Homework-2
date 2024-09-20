@@ -9,6 +9,24 @@ class Actions(Enum):
 
 class Space:
     def __init__(self, rows, columns, vacuumStartLoc, dirty_squares):
+        """
+        Initializes the space with a vacuum and dirty rooms
+
+        ## Parameters
+        * rows:  Number of rows for space 
+            * Type: int
+
+        * columns: Number of columns for space 
+            * Type: int
+
+        * vacuumStartLoc: Starting space (ordered pair) for vacuum 
+            * Type: (int, int)
+            * (1 based index)
+
+        * dirty_squares: List of location(s) (ordered pairs) for dirty rooms 
+            * Type: [(int, int),...]
+            * (1 based index)
+        """
         self.rows = rows
         self.columns = columns
         self.goalCost = 0
@@ -86,32 +104,6 @@ class Space:
                     print("Didn't perform action " + action.name)
         
 
-def setSpace(rows: int, columns: int, vacuumStartLoc, dirty_squares):
-    """
-    Initializes the space with a vacuum and dirty rooms
-
-    ## Parameters
-    * rows:  Number of rows for space 
-        * Type: int
-
-    * columns: Number of columns for space 
-        * Type: int
-
-    * vacuumStartLoc: Starting space (ordered pair) for vacuum 
-        * Type: (int, int)
-        * (1 based index)
-
-    * dirty_squares: List of location(s) (ordered pairs) for dirty rooms 
-        * Type: [(int, int),...]
-        * (1 based index)
-    """
-    array = [[Room(False, False) for i in range(columns)] for j in range(rows)]
-    array[vacuumStartLoc[0]-1][vacuumStartLoc[1]-1].hasVacuum = True
-
-    for i in dirty_squares:
-        array[i[0]-1][i[1]-1].isDirty = True
-
-    return array
 
 def main():
     instance1 = Space(4, 5, (2,2), [(1,2),(2,4),(3,5)])
