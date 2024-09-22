@@ -201,23 +201,40 @@ class Space:
 # if result = cutoff then cutoff-occurred? ← true
 # else if result ≠ failure then return result
 # if cutoff-occurred? then return cutoff else return failure
+IDS_First_5_Nodes = list()
+IDS_Expanded_Node_Count = 0
+def Depth_Limited_Search(node,limit):
+    return Recursive_DLS(node, limit)
 
-def iddfs(node,limit):
-        def dls(depth):
-            if len(node.state.dirtLocs) == 0:
-                return 1
-            if depth == 0:
-                return None
-            for action in Actions:
-                node.state.performAction(action)
-            return None
-        depth = 0
-        while True:
-            result = dls(depth)
-            if result == 1:
-                print(node.state.ActionList)
-                return 0
-            depth += 1
+def Recursive_DLS(node, limit):
+    global IDS_Expanded_Node_Count
+    IDS_Expanded_Node_Count += 1
+    if len(IDS_First_5_Nodes)< 5:
+        IDS_First_5_Nodes.append(node)
+    cutoffOccurred = False
+    if goal_test(node):
+        return node
+    elif node.depth == limit:
+        return -1
+    for successor in expand(node):
+        result = Recursive_DLS(successor, limit)
+        if result == -1:
+            cutoffOccurred = True
+        elif result != -2: 
+            return result
+    if cutoffOccurred:
+        return -1
+    else:
+        return -2
+
+def Iterative_Deepening_Search(Problem):
+    depth = 0
+    while True:
+        result = Depth_Limited_Search(Node(Problem),depth)
+        if result != -1:
+            return result
+        depth+=1
+        
 
 def general_tree_search(problem):
     fringe = [Node(problem)]
@@ -265,7 +282,8 @@ def main():
     # determined by the max location used between vacuum or dirty spots
     # instance1 = Space((2,2), [(1,2),(2,4),(3,5)])
     # instance2 = Space((3,2), [(1,2),(2,1),(2,4),(3,3)])
-
+##################################################################################################################################################
+    print("***************uniform cost graph search**********************")
     print("instance 1: uniform cost tree search")
     start = time.time()
     successNode, expanded, generated, first5nodes = uniform_cost_tree_search(copy.deepcopy(instance1))
@@ -278,8 +296,6 @@ def main():
         i.state.printFloorState()
     print("\tExpanded node count:", expanded)
     print(f"\tTook {end-start:.2f} seconds")
-
-
 
     print("\ninstance2: uniform cost tree search")
     start2 = time.time()
@@ -298,6 +314,58 @@ def main():
 
 
     # tstInstance.printFloorLayout()
+    print("***************************************************************")
+##################################################################################################################################################
+    print("***************uniform cost graph search**********************")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    print("***************************************************************")
+##################################################################################################################################################
+    print("***************Iterative Deepening Search**********************")
+
+    print("instance 1: Iterative Deepening Search")
+    start = time.time()
+    node = Iterative_Deepening_Search(copy.deepcopy(instance1))
+    end = time.time()
+    print(node)
+    # print("\tGenerated node count:", generated)
+    print("\tFirst 5 nodes generated")
+    for i in IDS_First_5_Nodes:
+        print(f"\t\tMovement: {i.actions}, State: ", end="")
+        i.state.printFloorState()
+    print("\tExpanded node count:", expanded)
+    print(f"\tTook {end-start:.2f} seconds")
+
+    print("instance 2: Iterative Deepening Search")
+    start = time.time()
+    node = Iterative_Deepening_Search(copy.deepcopy(instance2))
+    end = time.time()
+    print(node)
+    # print("\tGenerated node count:", generated)
+    # print("\tFirst 5 nodes generated")
+    # for i in first5nodes:
+    #     print(f"\t\tMovement: {i.actions}, State: ", end="")
+    #     i.state.printFloorState()
+    # print("\tExpanded node count:", expanded)
+    print(f"\tTook {end-start:.2f} seconds")
+
+
+    print("***************************************************************")
 
 if(__name__ == "__main__"):
     main()
