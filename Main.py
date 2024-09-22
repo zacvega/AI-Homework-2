@@ -69,7 +69,7 @@ def expand(node):
             if(move == Actions.SUCK):
                 break
 
-    return list(successors)
+    return list(sorted(successors))
 
 def pairMax(xlst):
     xMax = 0
@@ -201,23 +201,45 @@ class Space:
 # if result = cutoff then cutoff-occurred? ← true
 # else if result ≠ failure then return result
 # if cutoff-occurred? then return cutoff else return failure
+IDS_First_5_Nodes = list()
+def Depth_Limited_Search(node,limit):
+    return Recursive_DLS(node, limit, 0, 0)
 
-def iddfs(node,limit):
-        def dls(depth):
-            if len(node.state.dirtLocs) == 0:
-                return 1
-            if depth == 0:
-                return None
-            for action in Actions:
-                node.state.performAction(action)
-            return None
-        depth = 0
-        while True:
-            result = dls(depth)
-            if result == 1:
-                print(node.state.ActionList)
-                return 0
-            depth += 1
+def Recursive_DLS(node, limit, Exp_CT, Gen_CT):
+    if len(IDS_First_5_Nodes)< 5:
+        IDS_First_5_Nodes.append(node)
+    cutoffOccurred = False
+    if goal_test(node):
+        return node,Exp_CT,Gen_CT
+    elif node.depth == limit:
+        return -1,Exp_CT,Gen_CT
+    Exp_CT += 1
+    ExpandedNodes = expand(node)
+    Gen_CT += len(ExpandedNodes)
+    for successor in ExpandedNodes:
+        result, Exp_CT, Gen_CT = Recursive_DLS(successor, limit, Exp_CT, Gen_CT)
+        if result == -1:
+            cutoffOccurred = True
+        elif result != -2: 
+            return result, Exp_CT, Gen_CT
+    if cutoffOccurred:
+        return -1,Exp_CT, Gen_CT
+    else:
+        return -2,Exp_CT, Gen_CT
+
+def Iterative_Deepening_Search(Problem):
+    IDS_First_5_Nodes.clear()
+    depth = 0
+    Exp_Ct = 0
+    Gen_Ct = 0
+    while True:
+        result, tempExp_Ct, tempGen_Ct = Depth_Limited_Search(Node(Problem),depth)
+        Exp_Ct += tempExp_Ct
+        Gen_Ct += tempGen_Ct
+        if result != -1:
+            return result, Exp_Ct, Gen_Ct
+        depth+=1
+        
 
 def general_tree_search(problem):
     fringe = [Node(problem)]
@@ -260,44 +282,95 @@ def uniform_cost_tree_search(problem):
 def main():
     instance1 = Space((2,2), [(1,2),(2,4),(3,5)], 4, 5)
     instance2 = Space((3,2), [(1,2),(2,1),(2,4),(3,3)], 4, 5)
-    
+
     # the following 2 instances set up by limiting the space to only whats needed
     # determined by the max location used between vacuum or dirty spots
     # instance1 = Space((2,2), [(1,2),(2,4),(3,5)])
     # instance2 = Space((3,2), [(1,2),(2,1),(2,4),(3,3)])
+##################################################################################################################################################
+    # print("***************uniform cost graph search**********************")
+    # print("instance 1: uniform cost tree search")
+    # start = time.time()
+    # successNode, expanded, generated, first5nodes = uniform_cost_tree_search(copy.deepcopy(instance1))
+    # end = time.time()
+    # print(successNode)
+    # print("\tGenerated node count:", generated)
+    # print("\tFirst 5 nodes generated")
+    # for i in first5nodes:
+    #     print(f"\t\tMovement: {i.actions}, State: ", end="")
+    #     i.state.printFloorState()
+    # print("\tExpanded node count:", expanded)
+    # print(f"\tTook {end-start:.2f} seconds")
 
-    print("instance 1: uniform cost tree search")
+    # print("\ninstance2: uniform cost tree search")
+    # start2 = time.time()
+    # successNode2, expanded2, generated2, first5nodes2 = uniform_cost_tree_search(copy.deepcopy(instance2))
+    # end2 = time.time()
+    # print(successNode2)
+    # print("\tGenerated node count:", generated2)
+    # print("\tFirst 5 nodes generated")
+    # for i in first5nodes2:
+    #     print(f"\t\tMovement: {i.actions}, State: ", end="")
+    #     i.state.printFloorState()
+    # print("\tExpanded node count:", expanded2)
+    # print(f"\tTook {end2-start2:.2f} seconds")
+
+    # print(f"\nBoth instances in total took {end2-start:.2f} seconds")
+
+
+    # tstInstance.printFloorLayout()
+    print("***************************************************************")
+##################################################################################################################################################
+    print("***************uniform cost graph search**********************")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    print("***************************************************************")
+##################################################################################################################################################
+    print("***************Iterative Deepening Search**********************")
+
+    print("instance 1: Iterative Deepening Search")
     start = time.time()
-    successNode, expanded, generated, first5nodes = uniform_cost_tree_search(copy.deepcopy(instance1))
+    node, expanded, generated = Iterative_Deepening_Search(copy.deepcopy(instance1))
     end = time.time()
-    print(successNode)
+    print(node)
     print("\tGenerated node count:", generated)
     print("\tFirst 5 nodes generated")
-    for i in first5nodes:
+    for i in IDS_First_5_Nodes:
+        print(f"\t\tMovement: {i.actions}, State: ", end="")
+        i.state.printFloorState()
+    print("\tExpanded node count:", expanded)
+    print(f"\tTook {end-start:.2f} seconds")
+
+    print("instance 2: Iterative Deepening Search")
+    start = time.time()
+    node, expanded, generated = Iterative_Deepening_Search(copy.deepcopy(instance2))
+    end = time.time()
+    print(node)
+    print("\tGenerated node count:", generated)
+    print("\tFirst 5 nodes generated")
+    for i in IDS_First_5_Nodes:
         print(f"\t\tMovement: {i.actions}, State: ", end="")
         i.state.printFloorState()
     print("\tExpanded node count:", expanded)
     print(f"\tTook {end-start:.2f} seconds")
 
 
-
-    print("\ninstance2: uniform cost tree search")
-    start2 = time.time()
-    successNode2, expanded2, generated2, first5nodes2 = uniform_cost_tree_search(copy.deepcopy(instance2))
-    end2 = time.time()
-    print(successNode2)
-    print("\tGenerated node count:", generated2)
-    print("\tFirst 5 nodes generated")
-    for i in first5nodes2:
-        print(f"\t\tMovement: {i.actions}, State: ", end="")
-        i.state.printFloorState()
-    print("\tExpanded node count:", expanded2)
-    print(f"\tTook {end2-start2:.2f} seconds")
-
-    print(f"\nBoth instances in total took {end2-start:.2f} seconds")
-
-
-    # tstInstance.printFloorLayout()
+    print("***************************************************************")
 
 if(__name__ == "__main__"):
     main()
