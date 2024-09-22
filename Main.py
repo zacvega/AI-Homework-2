@@ -1,32 +1,87 @@
 from enum import Enum
+import copy
+import time
+
 # class syntax
 class Actions(Enum):
-    LEFT = 1
-    RIGHT = .9
-    UP = .8
-    DOWN = .7
     SUCK = .6
+    DOWN = .7
+    UP = .8
+    RIGHT = .9
+    LEFT = 1
 
 class Node:
-    def __init__(self, state, actions = [],pathCost = 0, depth = 0,  parent = None,):
+    def __init__(self, state, actions = list(), pathCost = 0, depth = 0, parent = None,):
         self.state = state
+        self.actions = actions
         self.pathCost = pathCost
         self.depth = depth
-        self.actions = actions
         self.parent = parent
         self.result = None
+    
+    def __lt__(self, other):
+        if(self.pathCost != other.pathCost):
+            return self.pathCost < other.pathCost
+        elif(self.state.vacLoc[0] != other.state.vacLoc[0]):
+                return self.state.vacLoc[0] < other.state.vacLoc[0]
+        elif(self.state.vacLoc[1] != other.state.vacLoc[1]):
+                return self.state.vacLoc[1] < other.state.vacLoc[1]
 
-def expand(node, state):
+    
+    def __str__(self):
+        a = list()
+        for i in self.actions:
+           a.append(i.name) 
+        return f'Actions: {a}\n\tCost: {self.pathCost:.1f}\n\tDepth: {self.depth}\n\tDirt Left: {len(self.state.dirtLocs)}'
+
+def goal_test(node):
+    if(len(node.state.dirtLocs) == 0):
+        return True
+    else:
+        return False
+
+def expand(node):
+    sensibleActions = list()
+    for i in Actions:
+        sensibleActions.append(i)
+
+    # the agent wont try and undo its last move
+    if(len(node.actions) > 0):
+        match node.actions[len(node.actions)-1].name:
+            case 'UP':
+                sensibleActions.remove(Actions.DOWN)
+            case 'DOWN':
+                sensibleActions.remove(Actions.UP)
+            case 'LEFT':
+                sensibleActions.remove(Actions.RIGHT)
+            case 'RIGHT':
+                sensibleActions.remove(Actions.LEFT)
+    
+
     successors = set()
-    for move in Actions:
-        s = Node(state, s.actions + move, s.pathCost + move.value, s.depth+1)
-        successors.add(s)
+    for move in sensibleActions:
+        state = copy.deepcopy(node.state)
+        # only adds the move to the expansion if it is valid (makes sense to do so)
+        if(state.isActionPossible(move)):
+            state.performAction(move)
+            s = Node(copy.deepcopy(state), node.actions + [move], node.pathCost + move.value, node.depth+1, node)
+            successors.add(s)
+            if(move == Actions.SUCK):
+                break
 
-    # print(successors)
-    return successors
+    return list(successors)
+
+def pairMax(xlst):
+    xMax = 0
+    yMax = 0
+    for i in xlst:
+        xMax = max(xMax, i[0])
+        yMax = max(yMax, i[1])
+
+    return xMax, yMax
 
 class Space:
-    def __init__(self, rows, columns, vacuumStartLoc, dirty_squares):
+    def __init__(self, vacuumStartLoc, dirty_squares, rows = None, columns = None):
         """
         Initializes the space with a vacuum and dirty rooms
 
@@ -45,8 +100,16 @@ class Space:
             * Type: [(int, int),...]
             * (1 based index)
         """
-        self.rows = rows
-        self.columns = columns
+        if(rows != None):
+            self.rows = rows
+        else:
+            self.rows = pairMax([vacuumStartLoc]+dirty_squares)[0]
+
+        if(columns != None):
+            self.columns = columns
+        else:
+            self.columns = pairMax([vacuumStartLoc]+dirty_squares)[1]
+
         self.goalCost = 0
         self.vacLoc = vacuumStartLoc
         self.dirtLocs = dirty_squares
@@ -79,48 +142,53 @@ class Space:
                 print(", d"+str(pair), end="")
         print("] with g = " + str(self.goalCost))
 
-    def performAction(self, action: Actions):
-        # print(action.name, action.value)
-        self.goalCost -= action.value
+    def performAction(self, action: Actions, verbose=False):
+        possible = self.isActionPossible(action)
+        if(possible):
+            match action.name:
+                case 'LEFT':
+                    self.vacLoc = (self.vacLoc[0], self.vacLoc[1] - 1)
+                case 'RIGHT':
+                    self.vacLoc = (self.vacLoc[0], self.vacLoc[1] + 1)
+                case 'UP':
+                    self.vacLoc = (self.vacLoc[0] - 1, self.vacLoc[1])
+                case 'DOWN':
+                    self.vacLoc = (self.vacLoc[0]+1, self.vacLoc[1]) 
+                case 'SUCK':
+                    self.dirtLocs.remove(self.vacLoc)
+                    
+            if(verbose):
+                if(action == Actions.SUCK):
+                    print("Cleaned " + str(self.vacLoc))
+                else:
+                    print("Moved "+action.name+" to " + str(self.vacLoc))
 
+            self.goalCost += action.value
+        else:
+            if(verbose):
+                print("Didn't perform action " + action.name)
+  
+    def isActionPossible(self, action: Actions):
         match action.name:
             case 'LEFT':
                 if(self.vacLoc[1] != 1):
-                    self.vacLoc = (self.vacLoc[0], self.vacLoc[1] - 1)
-                    print("Moved "+action.name+" to " + str(self.vacLoc))
-                else:
-                    print("Didn't perform action " + action.name)
+                    return True
 
             case 'RIGHT':
                 if(self.vacLoc[1] != self.columns):
-                    self.vacLoc = (self.vacLoc[0], self.vacLoc[1] + 1)
-                    print("Moved "+action.name+" to " + str(self.vacLoc))
-                else:
-                    print("Didn't perform action " + action.name)
+                    return True
 
             case 'UP':
                 if(self.vacLoc[0] != 1 ):
-                    self.vacLoc = (self.vacLoc[0] - 1, self.vacLoc[1])
-                    print("Moved "+action.name+" to " + str(self.vacLoc))
-                else:
-                    print("Didn't perform action " + action.name)
-
+                    return True
 
             case 'DOWN':
                 if(self.vacLoc[0] != self.rows):
-                    self.vacLoc = (self.vacLoc[0]+1, self.vacLoc[1]) 
-                    print("Moved "+action.name+" to " + str(self.vacLoc))
-                else:
-                    print("Didn't perform action " + action.name)
-
-
+                    return True
             case 'SUCK':
                 if(self.vacLoc in self.dirtLocs):
-                    self.dirtLocs.remove(self.vacLoc)
-                    print("Cleaned " + str(self.vacLoc))
-                else:
-                    print("Didn't perform action " + action.name)
-        
+                    return True
+        return False
 
 # function Depth-Limited-Search( problem,limit) returns soln/fail/cutoff
 # Recursive-DLS(Make-Node(Initial-Stat e [problem]),problem,limit)
@@ -151,17 +219,65 @@ def iddfs(node,limit):
                 return 0
             depth += 1
 
+def general_tree_search(problem):
+    fringe = [Node(problem)]
+    count = 0
+    while True:
+        if (len(fringe) == 0):
+            node.result = False
+            return False, count  
+        node = fringe.pop()
+        if goal_test(node):
+            node.result = True
+            return node, count 
+        fringe = fringe + expand(node)
+        count += 1
+
+def uniform_cost_tree_search(problem):
+    fringe = [Node(problem)]
+    count = 0
+    while True:
+        count +=1
+        if (len(fringe) == 0):
+            node.result = False
+            return False, count 
+        node = fringe.pop()
+        if goal_test(node):
+            node.result = True
+            return node, count 
+        # print(count)
+        fringe = fringe + expand(node)
+        fringe.sort(reverse=True)
+
 def main():
-    instance1 = Space(4, 5, (2,2), [(1,2),(2,4),(3,5)])
-    instance1.printFloorLayout()
-    instance1.printFloorState()
-    instance1.performAction(Actions.UP)
+    instance1 = Space((2,2), [(1,2),(2,4),(3,5)], 4, 5)
+    instance2 = Space((3,2), [(1,2),(2,1),(2,4),(3,3)], 4, 5)
+    
+    # the following 2 instances set up by limiting the space to only whats needed
+    # determined by the max location used between vacuum or dirty spots
+    # instance1 = Space((3,2), [(1,2),(2,4),(3,5)])
+    # instance2 = Space((2,2), [(1,2),(2,1),(2,4),(3,3)])
 
-    print("\n\n")
+    print("instance 1: uniform cost tree search")
+    start = time.time()
+    successNode, expanded = uniform_cost_tree_search(copy.deepcopy(instance1))
+    end = time.time()
+    print(successNode)
+    print("\tExpanded node count:", expanded)
+    print(f"\tTook {end-start:.2f} seconds")
 
-    instance2 = Space(4, 5, (3,2), [(1,2),(2,1),(2,4),(3,3)])
-    instance2.printFloorLayout()
-    instance2.printFloorState()
+    print("\ninstance2: uniform cost tree search")
+    start2 = time.time()
+    successNode2, expanded2 = uniform_cost_tree_search(copy.deepcopy(instance2))
+    end2 = time.time()
+    print(successNode2)
+    print("\tExpanded node count:", expanded2)
+    print(f"\tTook {end2-start2:.2f} seconds")
+
+    print(f"\nBoth instances in total took {end2-start:.2f} seconds")
+
+
+    # tstInstance.printFloorLayout()
 
 if(__name__ == "__main__"):
     main()
