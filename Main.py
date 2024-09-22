@@ -3,7 +3,7 @@ import copy
 import time
 
 # class syntax
-class Actions(Enum):
+class Actions(Enum): #All of the actions the vacuum can do
     SUCK = .6
     DOWN = .7
     UP = .8
@@ -203,42 +203,42 @@ class Space:
 # if cutoff-occurred? then return cutoff else return failure
 IDS_First_5_Nodes = list()
 def Depth_Limited_Search(node,limit):
-    return Recursive_DLS(node, limit, 0, 0)
+    return Recursive_DLS(node, limit, 0, 0)#(start node, level limit, expanded nodes, generated nodes)
 
 def Recursive_DLS(node, limit, Exp_CT, Gen_CT):
-    if len(IDS_First_5_Nodes)< 5:
-        IDS_First_5_Nodes.append(node)
-    cutoffOccurred = False
-    if goal_test(node):
+    if len(IDS_First_5_Nodes)< 5: #collect only the first 5 nodes.
+        IDS_First_5_Nodes.append(node) #add node to list
+    cutoffOccurred = False #assume 
+    if goal_test(node): # node has been reached where all rooms are clean
         return node,Exp_CT,Gen_CT
-    elif node.depth == limit:
-        return -1,Exp_CT,Gen_CT
-    Exp_CT += 1
-    ExpandedNodes = expand(node)
-    Gen_CT += len(ExpandedNodes)
-    for successor in ExpandedNodes:
-        result, Exp_CT, Gen_CT = Recursive_DLS(successor, limit, Exp_CT, Gen_CT)
-        if result == -1:
+    elif node.depth == limit: # level limit has been reached, after this the level limit will increase by 1 until the final node has been found.
+        return -1,Exp_CT,Gen_CT # -1 means not found
+    Exp_CT += 1 # Expanded count increases 
+    ExpandedNodes = expand(node) # expand to the next level
+    Gen_CT += len(ExpandedNodes) #generated count increases
+    for successor in ExpandedNodes: #for each expanded node
+        result, Exp_CT, Gen_CT = Recursive_DLS(successor, limit, Exp_CT, Gen_CT) # recursive call
+        if result == -1: #level limit was reached
             cutoffOccurred = True
-        elif result != -2: 
+        elif result != -2: #error
             return result, Exp_CT, Gen_CT
-    if cutoffOccurred:
+    if cutoffOccurred:#level limit was reached
         return -1,Exp_CT, Gen_CT
-    else:
+    else:#error
         return -2,Exp_CT, Gen_CT
 
 def Iterative_Deepening_Search(Problem):
-    IDS_First_5_Nodes.clear()
-    depth = 0
+    IDS_First_5_Nodes.clear() #list of the first 5 nodes searched in the graph
+    depth = 0 # limit inital depth to 0
     Exp_Ct = 0
     Gen_Ct = 0
-    while True:
+    while True: #For each level 0->1->...->n
         result, tempExp_Ct, tempGen_Ct = Depth_Limited_Search(Node(Problem),depth)
-        Exp_Ct += tempExp_Ct
-        Gen_Ct += tempGen_Ct
-        if result != -1:
+        Exp_Ct += tempExp_Ct # number of expanded nodes
+        Gen_Ct += tempGen_Ct # generated of expanded nodes
+        if result != -1: # No error
             return result, Exp_Ct, Gen_Ct
-        depth+=1
+        depth+=1 #Next level max depth
         
 
 def general_tree_search(problem):
