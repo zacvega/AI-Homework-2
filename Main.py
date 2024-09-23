@@ -279,24 +279,24 @@ def uniform_cost_tree_search(problem):
         fringe = fringe + newNodes
         fringe.sort(reverse=True)
 
-def uniform_cost_graph_search(problem):
-    fringe = [Node(problem)]
-    closed = set()
-    first5nodes = list()
-    expandedCount = 0
-    while True:
-        if (len(fringe) == 0):
+def uniform_cost_graph_search(problem): #uniform_graph_search
+    fringe = [Node(problem)]#get the first node for fringe
+    closed = set()#create an empty set called close
+    first5nodes = list()#make a list for the first 5 nodes
+    expandedCount = 0#var for expanded nodes
+    while True: #run loop
+        if (len(fringe) == 0): #if the fringe is empty return false, the count, and the first 5 nodes, and end function
             node.result = False
             return False, expandedCount, len(fringe), first5nodes
-        node = fringe.pop()
-        if goal_test(node):
+        node = fringe.pop()#remove a node from fringe
+        if goal_test(node):#check to see if that node is the goal if yes, return true, the count, and the expanded nodes
             node.result = True
             return node, expandedCount, len(fringe), first5nodes
         
 
 
 
-        if node.state not in closed:
+        if node.state not in closed: #if the state of the node is NOT in set closed, add it, then get 5 new nodes for fringe and update count
             closed.add(node.state)
             expandedCount +=1
             newNodes = expand(node)
@@ -307,7 +307,7 @@ def uniform_cost_graph_search(problem):
                     else:    
                         first5nodes.append(i)
             fringe = fringe + newNodes
-            fringe.sort(reverse=True)
+            fringe.sort(reverse=True)#rearrange fringe to have lowest cost node at the top, this is what makes this uniform cost
 
         
         
@@ -327,10 +327,10 @@ def main():
 
     #the following 2 instances set up by limiting the space to only whats needed
     #determined by the max location used between vacuum or dirty spots
-    instance1 = Space((2,2), [(1,2),(2,4),(3,5)])
-    instance2 = Space((3,2), [(1,2),(2,1),(2,4),(3,3)])
+    #instance1 = Space((2,2), [(1,2),(2,4),(3,5)])
+    #instance2 = Space((3,2), [(1,2),(2,1),(2,4),(3,3)])
 #################################################################################################################################################
-    print("***************uniform cost graph search**********************")
+    print("***************uniform cost tree search**********************")
     print("instance 1: uniform cost tree search")
     start = time.time()
     successNode, expanded, generated, first5nodes = uniform_cost_tree_search(copy.deepcopy(instance1))
