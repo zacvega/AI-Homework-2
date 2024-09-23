@@ -308,7 +308,7 @@ def uniform_cost_tree_search(problem):
         newNodes = expand(node)
 
         # get the first 5 generated nodes to use for report
-        if (len(first5nodes) < 5)
+        if (len(first5nodes) < 5):
             for i in newNodes:
                 if (len(first5nodes) >= 5):
                     break
@@ -368,8 +368,9 @@ def main():
 
     # the following 2 instances set up by limiting the space to only whats needed
     # determined by the max location used between vacuum or dirty spots
-    # instance1 = Space((2,2), [(1,2),(2,4),(3,5)])
-    # instance2 = Space((3,2), [(1,2),(2,1),(2,4),(3,3)])
+    instance1 = Space((2,2), [(1,2),(2,4),(3,5)])
+    instance2 = Space((3,2), [(1,2),(2,1),(2,4),(3,3)])
+
 #################################################################################################################################################
     print("***************uniform cost tree search**********************")
     print("instance 1: uniform cost tree search")
@@ -401,9 +402,8 @@ def main():
     print(f"\nBoth instances in total took {end2-start:.2f} seconds")
 
 
-    print("***************************************************************")
 ##################################################################################################################################################
-    print("***************uniform cost graph search**********************")
+    print("\n***************uniform cost graph search**********************")
     print("instance 1: uniform cost graph search")
     start = time.time()
     successNode, expanded, generated, first5nodes = uniform_cost_graph_search(copy.deepcopy(instance1))
@@ -431,30 +431,10 @@ def main():
     print(f"\tTook {end2-start2:.2f} seconds")
 
     print(f"\nBoth instances in total took {end2-start:.2f} seconds")
-    print("***************************************************************")
 
 
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    print("***************************************************************")
 ##################################################################################################################################################
-    print("***************Iterative Deepening Search**********************")
+    print("\n***************Iterative Deepening Search**********************")
 
     print("instance 1: Iterative Deepening Search")
     start = time.time()
@@ -469,10 +449,10 @@ def main():
     print("\tExpanded node count:", expanded)
     print(f"\tTook {end-start:.2f} seconds")
 
-    print("instance 2: Iterative Deepening Search")
-    start = time.time()
+    print("\ninstance 2: Iterative Deepening Search")
+    start2 = time.time()
     node, expanded, generated = Iterative_Deepening_Search(copy.deepcopy(instance2))
-    end = time.time()
+    end2 = time.time()
     print(node)
     print("\tGenerated node count:", generated)
     print("\tFirst 5 nodes generated")
@@ -482,8 +462,8 @@ def main():
     print("\tExpanded node count:", expanded)
     print(f"\tTook {end-start:.2f} seconds")
 
+    print(f"\nBoth instances in total took {end2-start:.2f} seconds")
 
-    print("***************************************************************")
 
 if(__name__ == "__main__"):
     main()
