@@ -255,59 +255,81 @@ def general_tree_search(problem):
         fringe = fringe + expand(node)
         count += 1
 
-def uniform_cost_tree_search(problem):#uniform tree search
-    fringe = [Node(problem)]#make the fringe and get first node
-    first5nodes = list()#make a var called for first 5 nodes
-    expandedCount = 0 #count variable
-    while True:       #run a loop
-        if (len(fringe) == 0): #if fringe is empty, return false and all the values
+def uniform_cost_tree_search(problem):
+    fringe = [Node(problem)]
+    first5nodes = list()
+    expandedCount = 0
+    while True:
+        # len of fringe will never be 0 on first run of while loop
+        if (len(fringe) == 0):
             node.result = False
             return False, expandedCount, len(fringe), first5nodes
-        node = fringe.pop()#get the top node of fringe
-        if goal_test(node):#if we are at the goal, return the values
+        
+        #retrieve first node  
+        node = fringe.pop()
+
+        # if we are at the goal, return the values
+        if goal_test(node):
             node.result = True 
             return node, expandedCount, len(fringe), first5nodes
-        expandedCount +=1 #update node count
-        newNodes = expand(node)#get new nodes
-        if (len(first5nodes) < 5):#put new nodes into first5
+       
+        # expand nodes and increment count    
+        expandedCount +=1
+        newNodes = expand(node)
+
+        # get the first 5 generated nodes to use for report
+        if (len(first5nodes) < 5)
             for i in newNodes:
                 if (len(first5nodes) >= 5):
                     break
                 else:    
                     first5nodes.append(i)
-            
-        fringe = fringe + newNodes#add new nodes to fringe
-        fringe.sort(reverse=True)#sort to lowest cost, this makes it uniform
+        
+        # add new nodes to fringe
+        fringe = fringe + newNodes
 
-def uniform_cost_graph_search(problem): #uniform_graph_search
-    fringe = [Node(problem)]#get the first node for fringe
-    closed = set()#create an empty set called close
-    first5nodes = list()#make a list for the first 5 nodes
-    expandedCount = 0#var for expanded nodes
-    while True: #run loop
-        if (len(fringe) == 0): #if the fringe is empty return false, the count, and the first 5 nodes, and end function
+        # sort to lowest cost, this makes it uniform
+        fringe.sort(reverse=True)
+
+def uniform_cost_graph_search(problem):
+    fringe = [Node(problem)]
+    closed = set()
+    first5nodes = list()
+    expandedCount = 0
+    while True:
+        # len of fringe will never be 0 on first run of while loop
+        if (len(fringe) == 0):
             node.result = False
             return False, expandedCount, len(fringe), first5nodes
-        node = fringe.pop()#remove a node from fringe
-        if goal_test(node):#check to see if that node is the goal if yes, return true, the count, and the expanded nodes
-            node.result = True
+        
+        #retrieve first node 
+        node = fringe.pop()
+
+        # if we are at the goal, return the values
+        if goal_test(node):
             return node, expandedCount, len(fringe), first5nodes
         
 
 
-
-        if node.state not in closed: #if the state of the node is NOT in set closed, add it, then get 5 new nodes for fringe and update count
+        #if the state of the node is NOT in set closed, add it, then get 5 new nodes for fringe and update count
+        if node.state not in closed:
             closed.add(node.state)
             expandedCount +=1
             newNodes = expand(node)
+
+            # get the first 5 generated nodes to use for report
             if (len(first5nodes) < 5):
                 for i in newNodes:
                     if (len(first5nodes) >= 5):
                         break
                     else:    
                         first5nodes.append(i)
+
+            # add new nodes to fringe
             fringe = fringe + newNodes
-            fringe.sort(reverse=True)#rearrange fringe to have lowest cost node at the top, this is what makes this uniform cost
+
+            # sort to lowest cost, this makes it uniform
+            fringe.sort(reverse=True)
 
         
         
@@ -360,7 +382,6 @@ def main():
     print(f"\nBoth instances in total took {end2-start:.2f} seconds")
 
 
-    #tstInstance.printFloorLayout()
     print("***************************************************************")
 ##################################################################################################################################################
     print("***************uniform cost graph search**********************")
