@@ -3,22 +3,36 @@ import copy
 import time
 
 # class syntax
-class Actions(Enum): #All of the actions the vacuum can do
+class Actions(Enum): #All of the actions the vacuum can do and its cost
     SUCK = .6
     DOWN = .7
     UP = .8
     RIGHT = .9
     LEFT = 1
 
+# Node 
 class Node:
     def __init__(self, state, actions = list(), pathCost = 0, depth = 0, parent = None,):
+        # Space class 
         self.state = state
+
+        # List of actions Node took
         self.actions = actions
+
+        # Path cost to reach this point
         self.pathCost = pathCost
+
+        # Depth in tree
         self.depth = depth
+
+        # Parent Node
         self.parent = parent
+
+        # If the node is succesful
         self.result = None
     
+    # sorting for uniform cost, prioritizes pathCost
+    # then lower row numbers then lower column numbers
     def __lt__(self, other):
         if(self.pathCost != other.pathCost):
             return self.pathCost < other.pathCost
@@ -27,26 +41,30 @@ class Node:
         elif(self.state.vacLoc[1] != other.state.vacLoc[1]):
                 return self.state.vacLoc[1] < other.state.vacLoc[1]
 
-    
+
     def __str__(self):
         a = list()
         for i in self.actions:
            a.append(i.name) 
         return f'Actions: {a}\n\tCost: {self.pathCost:.1f}\n\tDepth: {self.depth}\n\tDirt Left: {len(self.state.dirtLocs)}'
 
+# goal test: Goal == no dirty locations
 def goal_test(node):
     if(len(node.state.dirtLocs) == 0):
         return True
     else:
         return False
 
-def expand(node):
+# Expands a node
+# Optimized to not allow immediate back tracking
+# and expands only into a suck if the location is dirty
+def expand(node, doTrimming = True):
     sensibleActions = list()
     for i in Actions:
         sensibleActions.append(i)
 
-    # the agent wont try and undo its last move
-    if(len(node.actions) > 0):
+    # the agent wont try and undo its last move if told to do so
+    if(len(node.actions) > 0 and doTrimming):
         match node.actions[len(node.actions)-1].name:
             case 'UP':
                 sensibleActions.remove(Actions.DOWN)
@@ -59,18 +77,25 @@ def expand(node):
     
 
     successors = set()
+    # only adds the move to the expansion if it is valid (makes sense to do so)
     for move in sensibleActions:
         state = copy.deepcopy(node.state)
-        # only adds the move to the expansion if it is valid (makes sense to do so)
+        # only add the move if its possible
         if(state.isActionPossible(move)):
+            # updates the state and make the new expanded node
             state.performAction(move)
             s = Node(copy.deepcopy(state), node.actions + [move], node.pathCost + move.value, node.depth+1, node)
             successors.add(s)
+
+            # if SUCK is a possible and sensible action we want to suck 
+            # instead of moving off of a dirty square
             if(move == Actions.SUCK):
                 break
 
+    # return the expanded nodes
     return list(sorted(successors))
 
+# determine the max element for each index of a ordered pair
 def pairMax(xlst):
     xMax = 0
     yMax = 0
@@ -103,11 +128,13 @@ class Space:
         if(rows != None):
             self.rows = rows
         else:
+            # restrain the size of room to the highest used row
             self.rows = pairMax([vacuumStartLoc]+dirty_squares)[0]
 
         if(columns != None):
             self.columns = columns
         else:
+            # restrain the size of room to the highest used column
             self.columns = pairMax([vacuumStartLoc]+dirty_squares)[1]
 
         self.goalCost = 0
@@ -142,6 +169,7 @@ class Space:
                 print(", d"+str(pair), end="")
         print(f"] with g = {self.goalCost:.1f}")
 
+    # perform an action on the environment
     def performAction(self, action: Actions, verbose=False):
         possible = self.isActionPossible(action)
         if(possible):
@@ -168,6 +196,8 @@ class Space:
             if(verbose):
                 print("Didn't perform action " + action.name)
   
+    # determine if the action would move the agent out of bounds
+    # or would suck a clean space
     def isActionPossible(self, action: Actions):
         match action.name:
             case 'LEFT':
@@ -331,26 +361,15 @@ def uniform_cost_graph_search(problem):
             # sort to lowest cost, this makes it uniform
             fringe.sort(reverse=True)
 
-        
-        
-        
-        
-        
-
-
-
-
-    return 
-
 
 def main():
     instance1 = Space((2,2), [(1,2),(2,4),(3,5)], 4, 5)
     instance2 = Space((3,2), [(1,2),(2,1),(2,4),(3,3)], 4, 5)
 
-    #the following 2 instances set up by limiting the space to only whats needed
-    #determined by the max location used between vacuum or dirty spots
-    #instance1 = Space((2,2), [(1,2),(2,4),(3,5)])
-    #instance2 = Space((3,2), [(1,2),(2,1),(2,4),(3,3)])
+    # the following 2 instances set up by limiting the space to only whats needed
+    # determined by the max location used between vacuum or dirty spots
+    # instance1 = Space((2,2), [(1,2),(2,4),(3,5)])
+    # instance2 = Space((3,2), [(1,2),(2,1),(2,4),(3,3)])
 #################################################################################################################################################
     print("***************uniform cost tree search**********************")
     print("instance 1: uniform cost tree search")
@@ -393,8 +412,8 @@ def main():
     print("\tGenerated node count:", generated)
     print("\tFirst 5 nodes generated")
     for i in first5nodes:
-         print(f"\t\tMovement: {i.actions}, State: ", end="")
-         i.state.printFloorState()
+        print(f"\t\tMovement: {i.actions}, State: ", end="")
+        i.state.printFloorState()
     print("\tExpanded node count:", expanded)
     print(f"\tTook {end-start:.2f} seconds")
 
@@ -406,12 +425,13 @@ def main():
     print("\tGenerated node count:", generated2)
     print("\tFirst 5 nodes generated")
     for i in first5nodes2:
-         print(f"\t\tMovement: {i.actions}, State: ", end="")
-         i.state.printFloorState()
+        print(f"\t\tMovement: {i.actions}, State: ", end="")
+        i.state.printFloorState()
     print("\tExpanded node count:", expanded2)
     print(f"\tTook {end2-start2:.2f} seconds")
 
     print(f"\nBoth instances in total took {end2-start:.2f} seconds")
+    print("***************************************************************")
 
 
     
