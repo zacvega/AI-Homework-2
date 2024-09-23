@@ -368,8 +368,8 @@ def main():
 
     # the following 2 instances set up by limiting the space to only whats needed
     # determined by the max location used between vacuum or dirty spots
-    instance1 = Space((2,2), [(1,2),(2,4),(3,5)])
-    instance2 = Space((3,2), [(1,2),(2,1),(2,4),(3,3)])
+    # instance1 = Space((2,2), [(1,2),(2,4),(3,5)])
+    # instance2 = Space((3,2), [(1,2),(2,1),(2,4),(3,3)])
 
 #################################################################################################################################################
     print("***************uniform cost tree search**********************")
