@@ -255,29 +255,29 @@ def general_tree_search(problem):
         fringe = fringe + expand(node)
         count += 1
 
-def uniform_cost_tree_search(problem):
-    fringe = [Node(problem)]
-    first5nodes = list()
-    expandedCount = 0
-    while True:
-        if (len(fringe) == 0):
+def uniform_cost_tree_search(problem):#uniform tree search
+    fringe = [Node(problem)]#make the fringe and get first node
+    first5nodes = list()#make a var called for first 5 nodes
+    expandedCount = 0 #count variable
+    while True:       #run a loop
+        if (len(fringe) == 0): #if fringe is empty, return false and all the values
             node.result = False
             return False, expandedCount, len(fringe), first5nodes
-        node = fringe.pop()
-        if goal_test(node):
-            node.result = True
+        node = fringe.pop()#get the top node of fringe
+        if goal_test(node):#if we are at the goal, return the values
+            node.result = True 
             return node, expandedCount, len(fringe), first5nodes
-        expandedCount +=1
-        newNodes = expand(node)
-        if (len(first5nodes) < 5):
+        expandedCount +=1 #update node count
+        newNodes = expand(node)#get new nodes
+        if (len(first5nodes) < 5):#put new nodes into first5
             for i in newNodes:
                 if (len(first5nodes) >= 5):
                     break
                 else:    
                     first5nodes.append(i)
             
-        fringe = fringe + newNodes
-        fringe.sort(reverse=True)
+        fringe = fringe + newNodes#add new nodes to fringe
+        fringe.sort(reverse=True)#sort to lowest cost, this makes it uniform
 
 def uniform_cost_graph_search(problem): #uniform_graph_search
     fringe = [Node(problem)]#get the first node for fringe
